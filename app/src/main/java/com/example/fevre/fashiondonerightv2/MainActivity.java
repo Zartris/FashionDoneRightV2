@@ -2,10 +2,7 @@ package com.example.fevre.fashiondonerightv2;
 
 import android.graphics.Point;
 import android.os.AsyncTask;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -25,8 +22,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ListView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -44,12 +41,16 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private boolean isDialogOpen = false;
-    ArrayList<SmartFab> smartFabs;
+    private ArrayList<SmartFab> smartFabs;
+    public static Map<ClothItem.Type, ClothItem> clothList= new HashMap<>();
+    private ClothItem.Type lastPressed;
+
     @Override
     public void onBackPressed(){
         if(isDialogOpen){
@@ -94,12 +95,11 @@ public class MainActivity extends AppCompatActivity {
         smartFabs.add(jacketButton);
         smartFabs.add(pantsButton);
         smartFabs.add(shoesButton);
-
-        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_hat ,hatButton, this);
-        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_shirt ,shirtButton, this);
-        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_jacket ,jacketButton, this);
-        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_pants ,pantsButton, this);
-        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_shoes ,shoesButton, this);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_hat ,hatButton, this, ClothItem.Type.Hat);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_shirt ,shirtButton, this, ClothItem.Type.Shirt);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_jacket ,jacketButton, this, ClothItem.Type.Jacket);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_pants ,pantsButton, this, ClothItem.Type.Pants);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_shoes ,shoesButton, this, ClothItem.Type.Shoes);
 
         TextView brandSearch = (TextView) findViewById(R.id.brand_search);
         brandSearch.setOnClickListener(new View.OnClickListener() {
@@ -110,43 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 searchDialogFragment.show(manager, "searchdialog");
             }
         });
-        /**
-        hatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FrameLayout selectorMenu = (FrameLayout) findViewById(R.id.selector_menu);
 
-                ResizeWidthAnimation anim = new ResizeWidthAnimation(selectorMenu, 900);
-                anim.setDuration(500);
-                anim.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        Spinner spinner = (Spinner) findViewById(R.id.type_spinner);
-                        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(mainActivity,
-                                R.array.type_array, android.R.layout.simple_spinner_item);
-
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-                        spinner.setAdapter(adapter);
-
-
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-                selectorMenu.startAnimation(anim);
-
-            }
-        });
-        **/
         //FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         //fab.setOnClickListener(new View.OnClickListener() {
         //    @Override
@@ -157,10 +121,11 @@ public class MainActivity extends AppCompatActivity {
         //});
     }
 
-    private void addClickHandlers(final ArrayList<SmartFab> smartFabs, final int screenWidth, final int iconNumber, final SmartFab button, final MainActivity mainActivity) {
+    private void addClickHandlers(final ArrayList<SmartFab> smartFabs, final int screenWidth, final int iconNumber, final SmartFab button, final MainActivity mainActivity, final ClothItem.Type type) {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    lastPressed = type;
                     if(!(button.getX() == screenWidth-(button.getWidth()+30))){
                         button.setImageResource(iconNumber);
                         for (SmartFab smartFab : smartFabs) {
@@ -182,13 +147,113 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void onAnimationEnd(Animation animation) {
-                            Spinner spinner = (Spinner) findViewById(R.id.type_spinner);
-                            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(mainActivity,
-                                    R.array.type_array, android.R.layout.simple_spinner_item);
+                            ImageView iv = (ImageView) findViewById(R.id.figureSpot);
+                            iv.setImageResource(iconNumber);
+                            final Spinner spinnerMaterial = (Spinner) findViewById(R.id.material_spinner);
 
-                            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            final ArrayList<ClothItem.Material> materialList = ClothItem.Material.getMaterialList();
+                            ArrayList<String> materialStrings = new ArrayList<String>();
+                            for (ClothItem.Material material : materialList) {
+                                materialStrings.add(material.toString());
+                            }
 
-                            spinner.setAdapter(adapter);
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getBaseContext(),
+                                    android.R.layout.simple_spinner_item, android.R.id.text1, materialStrings);
+
+                            spinnerMaterial.setAdapter(adapter);
+
+                            if(lastPressed!= null && clothList.containsKey(lastPressed)){
+                                ClothItem clothItem = clothList.get(lastPressed);
+                                if(clothItem.getMaterial()!=null){
+                                    int i;
+                                    for (i = 0; i < materialList.size(); i++) {
+                                        ClothItem.Material material = materialList.get(i);
+                                        if(material == clothItem.getMaterial()){
+                                            break;
+                                        }
+                                    }
+                                    spinnerMaterial.setSelection(i);
+                                }
+                                TextView brandS = (TextView) findViewById(R.id.brand_search);
+                                if(clothItem.getBrand()!= null){
+                                    brandS.setText(clothItem.getBrand().getName());
+                                } else {
+                                    brandS.setText("select brand here");
+                                }
+
+                                if(clothItem.getUsage()!= null){
+                                    Spinner usageSpinner = (Spinner) findViewById(R.id.usage_spinner);
+                                    ArrayList<ClothItem.Usage> usageList = ClothItem.Usage.getUsageList();
+
+                                    int i;
+                                    for (i = 0; i < usageList.size(); i++) {
+                                        ClothItem.Usage usage = usageList.get(i);
+                                        if(usage == clothItem.getUsage()){
+                                            break;
+                                        }
+                                    }
+                                    usageSpinner.setSelection(i);
+                                }
+                            } else {
+                                ClothItem clothItem = new ClothItem();
+                                clothItem.setType(type);
+                                clothList.put(lastPressed, clothItem);
+                                TextView brandS = (TextView) findViewById(R.id.brand_search);
+                                brandS.setText("Select brand here");
+                            }
+
+                            spinnerMaterial.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                    ClothItem.Material material = materialList.get(position);
+                                    if(clothList.containsKey(lastPressed)){
+                                        ClothItem clothItem = clothList.get(lastPressed);
+                                        clothItem.setMaterial(material);
+                                    } else {
+                                        ClothItem clothItem = new ClothItem();
+                                        clothItem.setMaterial(material);
+                                        clothList.put(lastPressed,clothItem);
+                                    }
+                                }
+
+                                @Override
+                                public void onNothingSelected(AdapterView<?> parent) {
+
+                                }
+                            });
+
+                            final Spinner spinnerUsage = (Spinner) findViewById(R.id.usage_spinner);
+
+                            final ArrayList<ClothItem.Usage> usageList = ClothItem.Usage.getUsageList();
+                            ArrayList<String> usagesStrings = new ArrayList<String>();
+                            for (ClothItem.Usage usage : usageList) {
+                                usagesStrings.add(usage.toString());
+                            }
+
+                            ArrayAdapter<String> adapterForUsages = new ArrayAdapter<String>(getBaseContext(),
+                                    android.R.layout.simple_spinner_item, android.R.id.text1, usagesStrings);
+
+                            spinnerUsage.setAdapter(adapterForUsages);
+
+                            spinnerUsage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                    ClothItem.Usage usage = usageList.get(position);
+                                    if(clothList.containsKey(lastPressed)){
+                                        ClothItem clothItem = clothList.get(lastPressed);
+                                        clothItem.setUsage(usage);
+                                    } else {
+                                        ClothItem clothItem = new ClothItem();
+                                        clothItem.setUsage(usage);
+                                        clothList.put(lastPressed,clothItem);
+                                    }
+                                }
+
+                                @Override
+                                public void onNothingSelected(AdapterView<?> parent) {
+
+                                }
+                            });
 
 
                         }
@@ -402,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
             try {
 
                 Log.d("JRJ",result);
-                JSONArray json = new JSONArray(result);
+                final JSONArray json = new JSONArray(result);
 
                 ArrayList<String> items = new ArrayList<String>();
                 for(int i=0; i < json.length() ; i++) {
@@ -421,6 +486,25 @@ public class MainActivity extends AppCompatActivity {
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                         ((TextView) findViewById(R.id.brand_search)).setText((String) adapterView.getItemAtPosition(i));
                         sdf.dismiss();
+
+                        if(clothList.containsKey(lastPressed)){
+                            ClothItem clothItem = clothList.get(lastPressed);
+                            adapterView.getItemAtPosition(i);
+                            try {
+                                clothItem.setBrand(ClothItem.Brand.createBrand((String) adapterView.getItemAtPosition(i), json.getJSONObject(i).getInt("id"), json.getJSONObject(i).getString("link"),json.getJSONObject(i).getString("rating")));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                        } else {
+                            ClothItem clothItem = new ClothItem();
+                            try {
+                                clothItem.setBrand(ClothItem.Brand.createBrand((String) adapterView.getItemAtPosition(i), json.getJSONObject(i).getInt("id"), json.getJSONObject(i).getString("url"), json.getJSONObject(i).getString("rating")));
+                                clothList.put(lastPressed,clothItem);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 });
 

@@ -18,11 +18,33 @@ public class ClothItem {
 
     public enum Material{
         OrganicWool, ConventionalWool, Cotton, Silk, Polyester, Leather, Linen;
+        public static ArrayList<Material> getMaterialList(){
+            ArrayList<Material> materials = new ArrayList<>();
+            materials.add(OrganicWool);
+            materials.add(ConventionalWool);
+            materials.add(Cotton);
+            materials.add(Silk);
+            materials.add(Polyester);
+            materials.add(Leather);
+            materials.add(Linen);
+            return materials;
+        }
     }
+
+
 
     public enum Usage{
         Often, Avage, Rare;
+        public static ArrayList<Usage> getUsageList(){
+            ArrayList<Usage> usages = new ArrayList<>();
+            usages.add(Often);
+            usages.add(Avage);
+            usages.add(Rare);
+            return usages;
+        }
     }
+
+
 
     public static class Brand{
         private static ArrayList<Brand> brands = new ArrayList<Brand>();
@@ -30,6 +52,7 @@ public class ClothItem {
         private String name;
         private int id;
         private String url;
+        private String score;
 
         public static ArrayList<Brand> getBrands() {
             return brands;
@@ -48,27 +71,32 @@ public class ClothItem {
             return url;
         }
 
-        private Brand(String name, int id, String url){
-            this.name = name;
-            this.id = id;
-
-            this.url = url;
+        public String getScore() {
+            return score;
         }
 
-        public Brand createBrand(String name, int id, String url){
+        private Brand(String name, int id, String url, String score){
+            this.name = name;
+            this.id = id;
+            this.url = url;
+            this.score = score;
+        }
+
+        public static Brand createBrand(String name, int id, String url, String score){
             for(Brand b: brands){
                 if (b.getName().equals(name)) return b;
             }
-            Brand newBrand = new Brand(name, id, url);
+            Brand newBrand = new Brand(name, id, url,score);
+            brands.add(newBrand);
             return newBrand;
         }
     }
 
-    public ClothItem(Brand brand, Type type, Material material, Usage usage) {
-        this.brand = brand;
-        this.type = type;
-        this.material = material;
-        this.usage = usage;
+    public ClothItem() {
+        this.brand = null;
+        this.type = null;
+        this.material = null;
+        this.usage = null;
     }
 
     public void setBrand(Brand brand) {
