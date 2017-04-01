@@ -24,21 +24,67 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/buttonMap">
-        <!--
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
+
+        <com.example.fevre.fashiondonerightv2.SmartFab
+            android:id="@+id/fabHat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:fabSize="mini"
             app:srcCompat="@android:drawable/ic_input_add"
-            app:backgroundTint="@color/colorAccent"
-            android:layout_marginTop="100sp"
+            app:backgroundTint="@color/buttons"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            android:tint="@color/colorPrimaryDark"
+            android:tint="@color/whiteGreen"
             />
-        -->
+        <com.example.fevre.fashiondonerightv2.SmartFab
+            android:id="@+id/fabShirt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fabSize="mini"
+            app:srcCompat="@android:drawable/ic_input_add"
+            app:backgroundTint="@color/buttons"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:tint="@color/whiteGreen"
+            />
+        <com.example.fevre.fashiondonerightv2.SmartFab
+            android:id="@+id/fabJacket"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fabSize="mini"
+            app:srcCompat="@android:drawable/ic_input_add"
+            app:backgroundTint="@color/buttons"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:tint="@color/whiteGreen"
+            />
+        <com.example.fevre.fashiondonerightv2.SmartFab
+            android:id="@+id/fabPants"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fabSize="mini"
+            app:srcCompat="@android:drawable/ic_input_add"
+            app:backgroundTint="@color/buttons"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:tint="@color/whiteGreen"
+            />
+        <com.example.fevre.fashiondonerightv2.SmartFab
+            android:id="@+id/fabShoes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fabSize="mini"
+            app:srcCompat="@android:drawable/ic_input_add"
+            app:backgroundTint="@color/buttons"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:tint="@color/whiteGreen"
+            />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
