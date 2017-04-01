@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -47,6 +48,28 @@ import java.util.ArrayList;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+    private boolean isDialogOpen = false;
+    ArrayList<SmartFab> smartFabs;
+    @Override
+    public void onBackPressed(){
+        if(isDialogOpen){
+            closeDialog(this);
+        } else{
+            super.onBackPressed();
+        }
+    }
+
+    private void closeDialog(final MainActivity mainActivity) {
+        isDialogOpen = false;
+        FrameLayout selectorMenu = (FrameLayout) findViewById(R.id.selector_menu);
+
+        ResizeWidthAnimation anim = new ResizeWidthAnimation(selectorMenu, 0);
+        anim.setDuration(500);
+        selectorMenu.startAnimation(anim);
+        for (SmartFab smartFab : smartFabs) {
+            smartFab.startAnimation(smartFab.getAnimationBeta());
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         final Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        final ArrayList<SmartFab> smartFabs = new ArrayList<>();
+        smartFabs = new ArrayList<>();
         final int screenWidth = size.x; // int screenWidth = display.getWidth(); on API < 13
         final int screenHeight = size.y;
         final SmartFab hatButton = createFab(Math.round(0.39F * screenWidth), Math.round(0.1F * screenHeight), R.id.fabHat, screenWidth,screenHeight);
@@ -72,31 +95,11 @@ public class MainActivity extends AppCompatActivity {
         smartFabs.add(pantsButton);
         smartFabs.add(shoesButton);
 
-        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_hat ,hatButton);
-        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_shirt ,shirtButton);
-        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_jacket ,jacketButton);
-        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_pants ,pantsButton);
-        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_shoes ,shoesButton);
-        /**
-         for (SmartFab smartFab : smartFabs) {
-         smartFab.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-        if(!(smartFabs.get(0).getX() == screenWidth-(smartFabs.get(0).getWidth()))){
-        for (SmartFab smartFab : smartFabs) {
-        smartFab.startAnimation(smartFab.getAnimationAlpha());
-        }
-        } else {
-        for (SmartFab smartFab : smartFabs) {
-        smartFab.startAnimation(smartFab.getAnimationBeta());
-        }
-        }
-        }
-        });
-         }
-         **/
-
-        final MainActivity mainActivity = this;
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_hat ,hatButton, this);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_shirt ,shirtButton, this);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_jacket ,jacketButton, this);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_pants ,pantsButton, this);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_shoes ,shoesButton, this);
 
         TextView brandSearch = (TextView) findViewById(R.id.brand_search);
         brandSearch.setOnClickListener(new View.OnClickListener() {
@@ -107,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 searchDialogFragment.show(manager, "searchdialog");
             }
         });
-
+        /**
         hatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -143,19 +146,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-
-
-
-
-
-
-
-
-
-
-        RelativeLayout buttonMap = (RelativeLayout) findViewById(R.id.buttonMap);
-        buttonMap.addView(hatButton);
+        **/
         //FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         //fab.setOnClickListener(new View.OnClickListener() {
         //    @Override
@@ -166,29 +157,48 @@ public class MainActivity extends AppCompatActivity {
         //});
     }
 
-    private void addClickHandlers(final ArrayList<SmartFab> smartFabs, final int screenWidth, final int iconNumber, final SmartFab button) {
+    private void addClickHandlers(final ArrayList<SmartFab> smartFabs, final int screenWidth, final int iconNumber, final SmartFab button, final MainActivity mainActivity) {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(!(button.getX() == screenWidth-(button.getWidth()))){
+                    if(!(button.getX() == screenWidth-(button.getWidth()+30))){
                         button.setImageResource(iconNumber);
                         for (SmartFab smartFab : smartFabs) {
                             smartFab.startAnimation(smartFab.getAnimationAlpha());
                         }
+                        isDialogOpen = true;
                     } else {
                         button.setImageResource(iconNumber);
-                        // change icon
-
-                        // Open dialog
-
-
-                        /**
-                        // Moveback code
-                        for (SmartFab smartFab : smartFabs) {
-                            smartFab.startAnimation(smartFab.getAnimationBeta());
-                        }
-                         **/
                     }
+                    FrameLayout selectorMenu = (FrameLayout) findViewById(R.id.selector_menu);
+
+                    ResizeWidthAnimation anim = new ResizeWidthAnimation(selectorMenu, 900);
+                    anim.setDuration(500);
+                    anim.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            Spinner spinner = (Spinner) findViewById(R.id.type_spinner);
+                            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(mainActivity,
+                                    R.array.type_array, android.R.layout.simple_spinner_item);
+
+                            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                            spinner.setAdapter(adapter);
+
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+
+                        }
+                    });
+                    selectorMenu.startAnimation(anim);
                 }
             });
 
@@ -226,9 +236,9 @@ public class MainActivity extends AppCompatActivity {
         fab.setyMovPos(0);
 
         // setup animation
-        final Animation animation = new TranslateAnimation(0,screenWidth-(fab.getX()+fab.getDrawable().getIntrinsicWidth()+4),0,0);
+        final Animation animation = new TranslateAnimation(0,screenWidth-(fab.getX()+fab.getDrawable().getIntrinsicWidth()+34),0,0);
         // set Animation for 5 sec
-        animation.setDuration(1000);
+        animation.setDuration(500);
         //for button stops in the new position.
         animation.setFillAfter(true);
         animation.setAnimationListener(new Animation.AnimationListener() {
@@ -242,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
                 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                         RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                 fab.setLayoutParams(layoutParams);
-                fab.setX(screenWidth-(fab.getWidth()));
+                fab.setX(screenWidth-(fab.getWidth()+30));
             }
 
             @Override
@@ -257,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
         // close animation
         final Animation closeAnimation = new TranslateAnimation(0,-(screenWidth-(fab.getX()+fab.getDrawable().getIntrinsicWidth())),0,0);
         // set Animation for 5 sec
-        closeAnimation.setDuration(1000);
+        closeAnimation.setDuration(500);
         //for button stops in the new position.
         closeAnimation.setFillAfter(true);
         closeAnimation.setAnimationListener(new Animation.AnimationListener() {

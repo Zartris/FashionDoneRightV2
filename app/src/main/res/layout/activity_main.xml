@@ -15,7 +15,8 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="@color/toolbarColor"
+            android:titleTextColor="@color/whiteGreen"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
@@ -27,7 +28,7 @@
         android:id="@+id/selector_menu"
         android:layout_width="0dp"
         android:layout_height="fill_parent"
-        android:background="@drawable/side_nav_bar"
+        android:background="@color/dialogbackground"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true">
 
