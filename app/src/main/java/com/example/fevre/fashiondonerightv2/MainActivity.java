@@ -1,5 +1,6 @@
 package com.example.fevre.fashiondonerightv2;
 
+import android.content.Intent;
 import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import android.view.animation.Transformation;
 import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -108,6 +110,16 @@ public class MainActivity extends AppCompatActivity {
                 FragmentManager manager = getSupportFragmentManager();
                 SearchDialogFragment searchDialogFragment = new SearchDialogFragment();
                 searchDialogFragment.show(manager, "searchdialog");
+            }
+        });
+
+        Button showScoreButton = (Button) findViewById(R.id.showScore);
+        final MainActivity mainActivity = this;
+        showScoreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mainActivity, ScoreActivity.class);
+                startActivity(intent);
             }
         });
 

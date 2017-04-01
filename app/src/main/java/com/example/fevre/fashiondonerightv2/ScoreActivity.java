@@ -11,6 +11,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class ScoreActivity extends AppCompatActivity {
 
@@ -22,7 +23,7 @@ public class ScoreActivity extends AppCompatActivity {
         SmartFab score = (SmartFab) findViewById(R.id.total_score);
         double totalScore = 0;
         int countScore = 0;
-        for(ClothItem item: MainActivity.clothList.getValues()){
+        for(ClothItem item: MainActivity.clothList.values()){
             countScore++;
             switch (item.getBrand().getScore()) {
                 case "a": totalScore+=5;
@@ -53,19 +54,19 @@ public class ScoreActivity extends AppCompatActivity {
 
 
         ListView listview = (ListView) findViewById(R.id.score_listView);
-        listview.setAdapter(new ScoreAdapter(this, MainActivity.clothList.getValues()));
+        listview.setAdapter(new ScoreAdapter(this, MainActivity.clothList.values()));
 
     }
 
     static class ScoreAdapter extends BaseAdapter {
 
         Context context;
-        ArrayList<ClothItem> data;
+        ArrayList<ClothItem> data = new ArrayList<>();
         private static LayoutInflater inflater = null;
 
-        public ScoreAdapter(Context context, ArrayList<ClothItem> data) {
+        public ScoreAdapter(Context context, Collection<ClothItem> data) {
             this.context = context;
-            this.data = data;
+            this.data.addAll(data);
             inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
@@ -77,7 +78,7 @@ public class ScoreActivity extends AppCompatActivity {
 
         @Override
         public Object getItem(int position) {
-            return data[position];
+            return data.get(position);
         }
 
         @Override
@@ -93,11 +94,11 @@ public class ScoreActivity extends AppCompatActivity {
             TextView itemTitle = (TextView) vi.findViewById(R.id.item_title);
             itemTitle.setText(data.get(position).getType().toString());
             TextView itemBrand = (TextView) vi.findViewById(R.id.item_brand);
-            itemBrand.setText(data.get(position).getBrand().getName());
+            itemBrand.setText(" - "+data.get(position).getBrand().getName());
             TextView itemMaterial = (TextView) vi.findViewById(R.id.item_material);
-            itemMaterial.setText(data.get(position).getMaterial().toString());
+            itemMaterial.setText(" - "+data.get(position).getMaterial().toString());
             TextView itemUsage = (TextView) vi.findViewById(R.id.item_usage);
-            itemUsage.setText(data.get(position).getMaterial().toString());
+            itemUsage.setText(" - "+data.get(position).getUsage().toString());
             SmartFab itemScore = (SmartFab) vi.findViewById(R.id.item_score);
             switch (data.get(position).getBrand().getScore()) {
                 case "a": itemScore.setImageResource(R.drawable.ic_score_a);
