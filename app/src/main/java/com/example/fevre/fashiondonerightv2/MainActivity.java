@@ -2,7 +2,9 @@ package com.example.fevre.fashiondonerightv2;
 
 import android.graphics.Point;
 import android.os.AsyncTask;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -23,6 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -41,6 +44,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -50,14 +55,46 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-        Display display = getWindowManager().getDefaultDisplay();
+        final Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        int screenWidth = size.x; // int screenWidth = display.getWidth(); on API < 13
-        int screenHeight = size.y;
+        final ArrayList<SmartFab> smartFabs = new ArrayList<>();
+        final int screenWidth = size.x; // int screenWidth = display.getWidth(); on API < 13
+        final int screenHeight = size.y;
+        final SmartFab hatButton = createFab(Math.round(0.39F * screenWidth), Math.round(0.1F * screenHeight), R.id.fabHat, screenWidth,screenHeight);
+        final SmartFab shirtButton = createFab(Math.round(0.39F * screenWidth), Math.round(0.35F * screenHeight), R.id.fabShirt, screenWidth,screenHeight);
+        final SmartFab jacketButton = createFab(Math.round(0.39F * screenWidth), Math.round(0.25F * screenHeight), R.id.fabJacket, screenWidth,screenHeight);
+        final SmartFab pantsButton = createFab(Math.round(0.45F * screenWidth), Math.round(0.5F * screenHeight), R.id.fabPants, screenWidth,screenHeight);
+        final SmartFab shoesButton = createFab(Math.round(0.28F * screenWidth), Math.round(0.6F * screenHeight), R.id.fabShoes, screenWidth,screenHeight);
+        smartFabs.add(hatButton);
+        smartFabs.add(shirtButton);
+        smartFabs.add(jacketButton);
+        smartFabs.add(pantsButton);
+        smartFabs.add(shoesButton);
 
-        FloatingActionButton hatButton = createFab(Math.round(0.5F * screenWidth), 0);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_hat ,hatButton);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_shirt ,shirtButton);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_jacket ,jacketButton);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_pants ,pantsButton);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_shoes ,shoesButton);
+        /**
+         for (SmartFab smartFab : smartFabs) {
+         smartFab.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+        if(!(smartFabs.get(0).getX() == screenWidth-(smartFabs.get(0).getWidth()))){
+        for (SmartFab smartFab : smartFabs) {
+        smartFab.startAnimation(smartFab.getAnimationAlpha());
+        }
+        } else {
+        for (SmartFab smartFab : smartFabs) {
+        smartFab.startAnimation(smartFab.getAnimationBeta());
+        }
+        }
+        }
+        });
+         }
+         **/
 
         final MainActivity mainActivity = this;
 
@@ -129,6 +166,34 @@ public class MainActivity extends AppCompatActivity {
         //});
     }
 
+    private void addClickHandlers(final ArrayList<SmartFab> smartFabs, final int screenWidth, final int iconNumber, final SmartFab button) {
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(!(button.getX() == screenWidth-(button.getWidth()))){
+                        button.setImageResource(iconNumber);
+                        for (SmartFab smartFab : smartFabs) {
+                            smartFab.startAnimation(smartFab.getAnimationAlpha());
+                        }
+                    } else {
+                        button.setImageResource(iconNumber);
+                        // change icon
+
+                        // Open dialog
+
+
+                        /**
+                        // Moveback code
+                        for (SmartFab smartFab : smartFabs) {
+                            smartFab.startAnimation(smartFab.getAnimationBeta());
+                        }
+                         **/
+                    }
+                }
+            });
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -151,12 +216,72 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private FloatingActionButton createFab(int x,int y){
-        FloatingActionButton floatingActionButton = new FloatingActionButton(this);
-        floatingActionButton.setX(x);
-        floatingActionButton.setY(y);
+    private SmartFab createFab(int x,int y, int id, final int screenWidth, final int screenHeight){
+        final SmartFab fab= (SmartFab) findViewById(id);
+        fab.setX(x);
+        fab.setY(y);
+        fab.setxStdPos(x);
+        fab.setyStdPos(y);
+        fab.setxMovPos(screenWidth-(fab.getX()+fab.getWidth()));
+        fab.setyMovPos(0);
 
-        return floatingActionButton;
+        // setup animation
+        final Animation animation = new TranslateAnimation(0,screenWidth-(fab.getX()+fab.getDrawable().getIntrinsicWidth()+4),0,0);
+        // set Animation for 5 sec
+        animation.setDuration(1000);
+        //for button stops in the new position.
+        animation.setFillAfter(true);
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                fab.clearAnimation();
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                fab.setLayoutParams(layoutParams);
+                fab.setX(screenWidth-(fab.getWidth()));
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        fab.setAnimationAlpha(animation);
+
+
+
+        // close animation
+        final Animation closeAnimation = new TranslateAnimation(0,-(screenWidth-(fab.getX()+fab.getDrawable().getIntrinsicWidth())),0,0);
+        // set Animation for 5 sec
+        closeAnimation.setDuration(1000);
+        //for button stops in the new position.
+        closeAnimation.setFillAfter(true);
+        closeAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                fab.clearAnimation();
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                fab.setLayoutParams(layoutParams);
+                fab.setX(fab.getxStdPos());
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        fab.setAnimationBeta(closeAnimation);
+
+        return fab;
     }
 
     public class ResizeWidthAnimation extends Animation
