@@ -1,31 +1,45 @@
 package com.example.fevre.fashiondonerightv2;
 
 import android.graphics.Point;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,6 +60,16 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton hatButton = createFab(Math.round(0.5F * screenWidth), 0);
 
         final MainActivity mainActivity = this;
+
+        TextView brandSearch = (TextView) findViewById(R.id.brand_search);
+        brandSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentManager manager = getSupportFragmentManager();
+                SearchDialogFragment searchDialogFragment = new SearchDialogFragment();
+                searchDialogFragment.show(manager, "searchdialog");
+            }
+        });
 
         hatButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,6 +93,8 @@ public class MainActivity extends AppCompatActivity {
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
                         spinner.setAdapter(adapter);
+
+
                     }
 
                     @Override
@@ -168,38 +194,131 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public class SearchDialogFragment extends DialogFragment implements TextView.OnEditorActionListener {
-
-        private EditText mEditText;
-
-
-        // Empty constructor required for DialogFragment
-        public SearchDialogFragment() {}
+    public class SearchDialogFragment extends DialogFragment {
+        private SearchDialogFragment dialog = this;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.searchdialog, container);
-            mEditText = (EditText) view.findViewById(R.id.search_editText);
+            final View rootView = inflater.inflate(R.layout.searchdialog, container,
+                    false);
+            getDialog().setTitle("DialogFragment Tutorial");
 
-            // set this instance as callback for editor action
-            mEditText.setOnEditorActionListener(this);
-            mEditText.requestFocus();
-            getDialog().getWindow().setSoftInputMode(
-                    WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-            getDialog().setTitle("Please enter username");
 
-            return view;
+
+            EditText searchEditText = (EditText) rootView.findViewById(R.id.search_editText);
+            searchEditText.setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                    if(keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                        Log.d("JRJ", "Start search");
+
+                        ListView listView = (ListView) rootView.findViewById(R.id.search_result_list);
+                        BrandSearchTask bst = new BrandSearchTask();
+                        bst.prepare(((EditText) view).getText().toString(),
+                                listView, dialog);
+                        bst.execute();
+                    }
+                    return true;
+                }
+            });
+            // Do something else
+            return rootView;
+        }
+    }
+
+    class BrandSearchTask extends AsyncTask<String, String, String> {
+        private String searchText;
+        private ListView listView;
+        private SearchDialogFragment sdf;
+
+        public void prepare(String searchText, ListView listView, SearchDialogFragment sdf){
+            this.searchText = searchText;
+            this.listView = listView;
+            this.sdf = sdf;
+        }
+        @Override
+        protected String doInBackground(String... params) {
+            String str = null;
+            URL url = null;
+            try {
+                url = new URL("https://mrjakob.dk/test/brandSearch.php?s=" + searchText);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            HttpURLConnection urlConnection = null;
+            try {
+                urlConnection = (HttpURLConnection) url.openConnection();
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+
+                str = getResult(in);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                urlConnection.disconnect();
+            }
+            return str;
+
         }
 
         @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            // Return input text to activity
-            /*UserNameListener activity = (UserNameListener) getActivity();
-            activity.onFinishUserDialog(mEditText.getText().toString());
-            this.dismiss();
-            return true;*/
-            return true;
+        protected void onPostExecute(String result) {
+            try {
+
+                Log.d("JRJ",result);
+                JSONArray json = new JSONArray(result);
+
+                ArrayList<String> items = new ArrayList<String>();
+                for(int i=0; i < json.length() ; i++) {
+                    JSONObject json_data = json.getJSONObject(i);
+                    //int id=json_data.getInt("id");
+                    String name=json_data.getString("name");
+                    items.add(name);
+                    Log.d(name,"Output");
+                }
+                final ArrayAdapter adapter = new ArrayAdapter<String>(getBaseContext(),
+                        android.R.layout.simple_list_item_1, android.R.id.text1, items);
+
+                listView.setAdapter(adapter);
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        ((TextView) findViewById(R.id.brand_search)).setText((String) adapterView.getItemAtPosition(i));
+                        sdf.dismiss();
+                    }
+                });
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private String getResult(InputStream in) {
+            String str = convertStreamToString(in);
+            return str;
+        }
+
+        private String convertStreamToString(InputStream is) {
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+
+            String line ="";
+            try {
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return sb.toString();
         }
     }
 }
