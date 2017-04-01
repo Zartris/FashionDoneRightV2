@@ -1,6 +1,7 @@
 package com.example.fevre.fashiondonerightv2;
 
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -44,7 +45,13 @@ public class MainActivity extends AppCompatActivity {
         smartFabs.add(pantsButton);
         smartFabs.add(shoesButton);
 
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_hat ,hatButton);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_shirt ,shirtButton);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_jacket ,jacketButton);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_pants ,pantsButton);
+        addClickHandlers(smartFabs, screenWidth,R.drawable.ic_shoes ,shoesButton);
 
+        /**
         for (SmartFab smartFab : smartFabs) {
             smartFab.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -61,21 +68,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
-
-        /**
-        // menu buttons
-        final SmartFab hatMenuButton = createFab(Math.round(0.39F * screenWidth), Math.round(0.1F * screenHeight), R.id.fabHat, screenWidth,screenHeight);
-        final SmartFab shirtMenuButton = createFab(Math.round(0.39F * screenWidth), Math.round(0.35F * screenHeight), R.id.fabShirt, screenWidth,screenHeight);
-        final SmartFab jacketMenuButton = createFab(Math.round(0.39F * screenWidth), Math.round(0.25F * screenHeight), R.id.fabJacket, screenWidth,screenHeight);
-        final SmartFab pantsMenuButton = createFab(Math.round(0.45F * screenWidth), Math.round(0.5F * screenHeight), R.id.fabPants, screenWidth,screenHeight);
-        final SmartFab shoesMenuButton = createFab(Math.round(0.28F * screenWidth), Math.round(0.6F * screenHeight), R.id.fabShoes, screenWidth,screenHeight);
-        // disable menu buttons
-        hatMenuButton.setVisibility(View.GONE);
-        shirtMenuButton.setVisibility(View.GONE);
-        jacketMenuButton.setVisibility(View.GONE);
-        pantsMenuButton.setVisibility(View.GONE);
-        shoesMenuButton.setVisibility(View.GONE);
         **/
+        
 
         //FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         //fab.setOnClickListener(new View.OnClickListener() {
@@ -85,6 +79,34 @@ public class MainActivity extends AppCompatActivity {
         //                .setAction("Action", null).show();
         //    }
         //});
+    }
+
+    private void addClickHandlers(final ArrayList<SmartFab> smartFabs, final int screenWidth, final int iconNumber, final SmartFab button) {
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(!(button.getX() == screenWidth-(button.getWidth()))){
+                        button.setImageResource(iconNumber);
+                        for (SmartFab smartFab : smartFabs) {
+                            smartFab.startAnimation(smartFab.getAnimationAlpha());
+                        }
+                    } else {
+                        button.setImageResource(iconNumber);
+                        // change icon
+
+                        // Open dialog
+
+
+                        /**
+                        // Moveback code
+                        for (SmartFab smartFab : smartFabs) {
+                            smartFab.startAnimation(smartFab.getAnimationBeta());
+                        }
+                         **/
+                    }
+                }
+            });
+
     }
 
     @Override
@@ -173,39 +195,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         fab.setAnimationBeta(closeAnimation);
-        /**
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Animation animation = new TranslateAnimation(0,screenWidth-(fab.getX()+fab.getWidth()),0,0);
-                // set Animation for 5 sec
-                animation.setDuration(1000);
-                //for button stops in the new position.
-                animation.setFillAfter(true);
-                fab.setAnimation(animation);
-                fab.startAnimation(animation);
-                animation.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                    }
 
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        fab.clearAnimation();
-                        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                                RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                        fab.setLayoutParams(layoutParams);
-                        fab.setX(screenWidth-(fab.getWidth()));
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-            }
-        });
-        */
         return fab;
     }
 }
